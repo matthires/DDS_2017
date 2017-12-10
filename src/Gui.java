@@ -155,6 +155,7 @@ public class Gui {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				mtx.isDefinite(mtx.getMatrix());
 				showFwMatrix();
 			}
 		});

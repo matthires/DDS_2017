@@ -60,9 +60,13 @@ public class Matrix {
         		for(int k = 0;k < dim;k++){
     				shrtPath = Math.min( getValueOf(mtx, i, k) 
     					+ getValueOf(mtx, k, j), getValueOf(mtx, i, j));
+    				if(shrtPath < -10000){
+    					shrtPath = Math.max( getValueOf(mtx, i, k) 
+    	    					+ getValueOf(mtx, k, j), getValueOf(mtx, i, j));
+    				}
         			if(shrtPath < -10000){
             			fwMatrix[i][j] = fwMatrix[i][j];        				
-        			}
+        			}        			
         			else{
         				fwMatrix[i][j] = 0;
         			}
@@ -73,17 +77,40 @@ public class Matrix {
 	}
 	
 	/**
-	 * Counts the Strongly Transitive Closure from the
-	 * Weakly Transitive Closure
-	 * @param wcc the Weakly Transitive Closure
+	 * Counts the Strongly Transitive Closure as 
+	 * (E + D)^n-1
+	 * @param  matrix to get the stc of
 	 * @return the Strongly Transitive Closure
 	 */
-	public double[][] getStrTC(double[][] wtc){
-		double[][] stc = wtc;
+	public double[][] getStrTC(double[][] matrix){
+		double[][] mtx = matrix;
 		for(int i=0;i<dim;i++){
-			stc[i][i] = 0;
+			mtx[i][i] = 0;
 		}
-		return stc;
+		return powerMatrix(mtx, dim-1);
+	}
+	
+	/**
+     * Multiplies 2 matrices from the input.
+     * @param m1 the multiplicand matrix 
+     * @param2 m2 the multiplier matrix
+     * @return Matrix  m1*m2
+     */
+	public double[][] multiplyMatrix(double[][] m1, double[][] m2){
+		double[][] matrix = m1;
+    	// temporary list to save the set of numbers we need the maximum of
+		ArrayList<Double> temp = new ArrayList<Double>();
+    	 for (int i=0;i<dim;i++){
+             for (int j=0;j<dim;j++){   
+                for (int k=0;k<dim;k++){
+                   temp.add(m1[i][k] + m2[k][j]);
+                }  
+                matrix[i][j] = getMax(temp);
+                temp.clear(); //resetting the list
+             }
+          }
+		return matrix; 
+		
 	}
 	
 	
@@ -121,10 +148,12 @@ public class Matrix {
 	 * @return true if the matrix is definite, else false
 	 */
 	public boolean isDefinite(double[][] matrix){
-		double[][] wtc = floydWarshall(mtx); //weakly transitive closure
-		double[][] stc = getStrTC(wtc); //strongly transitive closure
+		double[][] stc = getStrTC(matrix);//strongly transitive closure
+		double[][] wtc = multiplyMatrix(matrix, stc); //weakly transitive closure	
+
+		
 		ArrayList<Double> diag = new ArrayList<Double>();
-		double lambda;
+		double lambda = 0;
 		
 		boolean isDef = true;
 		for(int i = 0;i < dim;i++){
@@ -135,10 +164,24 @@ public class Matrix {
         		diag.add(powerMatrix(matrix, dim)[i][i]);
         	}
     	}		
-		lambda = getMin(diag);
+		lambda = getMax(diag);
 		if(lambda != 0 || !isDef){
 			isDef = false;
 		}
+		for(int i=0;i<dim;i++){
+			for(int j=0;j<dim;j++){
+				System.out.print(wtc[i][j] + "  ");
+			}
+			System.out.println("\n");
+		}
+		System.out.println("\n\n");
+		for(int i=0;i<dim;i++){
+			for(int j=0;j<dim;j++){
+				System.out.print(stc[i][j] + "  ");
+			}
+			System.out.println("\n");
+		}
+		
 		
 		return isDef;
 	}
@@ -162,17 +205,9 @@ public class Matrix {
 	
 	public double[][] powerMatrix(double[][] matrix, int power){
 		double[][] poweredMatrix = matrix;
-		ArrayList<Double> temp = new ArrayList<Double>();
 		
 		for(int h=0;h<power;h++){
-			for(int i = 0;i < dim;i++){
-	        	for(int j = 0;j < dim;j++){
-	        		for(int k = 0;k < dim;k++){
-	        			temp.add(poweredMatrix[i][k] + matrix[k][j]);
-	            	}
-	            		poweredMatrix[i][j] = getMax(temp);
-	        	}
-			}
+			poweredMatrix = multiplyMatrix(poweredMatrix, matrix);
 		}
 		
 		return poweredMatrix;
@@ -223,6 +258,12 @@ public class Matrix {
 		return eigenSpace + ending;
 	}
 	
+	/**
+	 * 
+	 * @param d1
+	 * @param d2
+	 * @return
+	 */
 	public boolean areIndependent(ArrayList<Double> d1, ArrayList<Double> d2){
 		boolean areIndep = true;
 		double dif;
