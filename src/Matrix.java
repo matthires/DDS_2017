@@ -12,57 +12,46 @@ import java.util.ArrayList;
  *
  */
 public class Matrix {	
-		private int dim;
-		private double[][] mtx;
-		private Gui gui;
+		private int dim;		
 		static final double EPS = -100000;
+		private double[][] matrix;
 		
 		/**
-		 * Displays 2 matrices in form of 2D array of text fields on the main frame.
-		 * 
-		 * @param frame The main frame of the GUI
+		 * Creates a matrix as a 2d array
 		 * @param dimension Dimension of the matrices
-		 * @param panel Label to display the matrices
 		 */
-	public  Matrix(Gui gui, int dimension){   
-		//the main frame -for updating the screen 
-		this.gui = gui;
+	public Matrix(int dimension){   
 		dim = dimension; //dimension of the matrix
-		mtx = new double[dimension][dimension];
-		
+		matrix = new double[dim][dim];
 	}
 	
 	/**
 	 * Returns the matrix we are working with
-	 * @return 2d matrix
+	 * @return  matrix as a 2d array
 	 */
-	public double[][] getMatrix(){
-		
-		for(int i = 0;i < dim;i++){
-        	for(int j = 0;j < dim;j++){
-        		mtx[i][j] = gui.getMtxValue(i, j);
-        	}
-		}
-		return mtx;
+	public double[][] getMatrix(){		
+		return matrix;
 	}
 	
 	/**
-	 * Floyd-Warshall algorithm.
-	 * @param mtx the matrix to use the algorithm on
+	 * Floyd-Warshall algorithm. Finds the less weighted paths from-to every 
+	 * vertex. Returns the ordered matrix.
+	 *
 	 * @return the reordered matrix with the less weighted paths
 	 */
-	public double[][] floydWarshall(double[][] mtx){
-		double[][] fwMatrix = mtx;
+	public double[][] getFWMatrix(){
+		double[][] fwMatrix = new double[dim][dim];
 		double shrtPath = 0;
 		
 		for(int i = 0;i < dim;i++){
         	for(int j = 0;j < dim;j++){
+        		fwMatrix[i][j] = matrix[i][j];
         		for(int k = 0;k < dim;k++){
-    				shrtPath = Math.min( getValueOf(mtx, i, k) 
-    					+ getValueOf(mtx, k, j), getValueOf(mtx, i, j));
+    				shrtPath = Math.min( getValueOf(i, k) 
+    					+ getValueOf(k, j), getValueOf( i, j));
     				if(shrtPath < -10000){
-    					shrtPath = Math.max( getValueOf(mtx, i, k) 
-    	    					+ getValueOf(mtx, k, j), getValueOf(mtx, i, j));
+    					shrtPath = Math.max( getValueOf(i, k) 
+    	    					+ getValueOf(k, j), getValueOf(i, j));
     				}
         			if(shrtPath < -10000){
             			fwMatrix[i][j] = fwMatrix[i][j];        				
@@ -78,14 +67,20 @@ public class Matrix {
 	
 	/**
 	 * Counts the Strongly Transitive Closure as 
-	 * (E + D)^n-1
-	 * @param  matrix to get the stc of
+	 * (E + D)^n-1 [the D is the matrix we are working with]
+	 *
 	 * @return the Strongly Transitive Closure
 	 */
-	public double[][] getStrTC(double[][] matrix){
-		double[][] mtx = matrix;
+	public double[][] getStrTC(){
+		double[][] mtx = new double[dim][dim];
 		for(int i=0;i<dim;i++){
-			mtx[i][i] = 0;
+			for(int j=0;j<dim;j++){
+				if(i == j ||  matrix[i][j] > -10000){
+					mtx[i][i] = 0;
+				}else{
+					mtx[i][j] = matrix[i][j];
+				}
+			}
 		}
 		return powerMatrix(mtx, dim-1);
 	}
@@ -97,19 +92,23 @@ public class Matrix {
      * @return Matrix  m1*m2
      */
 	public double[][] multiplyMatrix(double[][] m1, double[][] m2){
-		double[][] matrix = m1;
+		double[][] mtx = new double[dim][dim];
     	// temporary list to save the set of numbers we need the maximum of
 		ArrayList<Double> temp = new ArrayList<Double>();
     	 for (int i=0;i<dim;i++){
              for (int j=0;j<dim;j++){   
                 for (int k=0;k<dim;k++){
-                   temp.add(m1[i][k] + m2[k][j]);
-                }  
-                matrix[i][j] = getMax(temp);
+                    temp.add(m1[i][k] + m2[k][j]);
+                }
+                if(getMax(temp) < -10000){
+                	mtx[i][j] = EPS;
+                }else{
+                	mtx[i][j] = getMax(temp);
+                }              
                 temp.clear(); //resetting the list
              }
           }
-		return matrix; 
+		return mtx; 
 		
 	}
 	
@@ -120,13 +119,13 @@ public class Matrix {
 	 * @param vertex2 end vertex
 	 * @return The weight of the edge from vertex1 to vertex2
 	 */
-	public double getValueOf(double[][] matrix, int vertex1, int vertex2) {
+	public double getValueOf(int vertex1, int vertex2) {
 		return matrix[vertex1][vertex2];
 	}
 	 
 	/**
      * Gets the minimal number from a set of numbers
-     * @param list - list of numbers to get the minimum value of
+     * @param list - list of numbers to get the minimum value from
      * @return the minimal value from the set
      */
     public double getMin(ArrayList<Double> list) {
@@ -140,17 +139,59 @@ public class Matrix {
 		 return min;
 	 }
 	
+    /**
+     * A help method for debugging.
+     * Prints out the matrix from the input to the console.
+     * @param matrix as a 2d array to print out
+     */
+    public void debugprint(double[][] matrix){
+    	System.out.println("--------------------------------");
+    	for(int i=0;i<dim;i++){
+			for(int j=0;j<dim;j++){
+				System.out.print(matrix[i][j] + "  ");
+			}
+			System.out.println("\n");
+		}
+    	System.out.println("--------------------------------");
+    }
+    
+    /**
+     * Method for debugging..
+     */
+    public void debug(){
+    	double[][] stc = getStrTC();//strongly transitive closure
+		double[][] wtc = multiplyMatrix(matrix, stc); //weakly transitive closure	
+
+		double[][] a2 = multiplyMatrix(matrix, matrix); 
+		double[][] a3 = multiplyMatrix(a2, matrix); 
+		double[][] a4 = multiplyMatrix(a2, matrix); 		
+		
+		System.out.println("A");
+		debugprint(matrix);
+		System.out.println("A^2");
+		debugprint(a2);
+		System.out.println("A^3");
+		debugprint(a3);
+		System.out.println("A^4");
+		debugprint(a4);   
+		System.out.println("stc");
+		debugprint(stc);    	
+		System.out.println("wtc");
+		debugprint(wtc);    	
+		
+    }
 	
 	/**
 	 * Checks whether the given matrix is a definite matrix or not.
 	 * A matrix is definite, when its eigenvalue is equal to 0 and
-	 * its digraph is strongly connected.
+	 * its digraph is strongly connected. 
+	 * A matrix is strongly connected if the Strongly 
+	 * and the Weakly transitive closures are equal.
 	 * @return true if the matrix is definite, else false
 	 */
-	public boolean isDefinite(double[][] matrix){
-		double[][] stc = getStrTC(matrix);//strongly transitive closure
+	public boolean isDefinite(){
+		double[][] stc = getStrTC();//strongly transitive closure
 		double[][] wtc = multiplyMatrix(matrix, stc); //weakly transitive closure	
-
 		
 		ArrayList<Double> diag = new ArrayList<Double>();
 		double lambda = 0;
@@ -168,46 +209,41 @@ public class Matrix {
 		if(lambda != 0 || !isDef){
 			isDef = false;
 		}
-		for(int i=0;i<dim;i++){
-			for(int j=0;j<dim;j++){
-				System.out.print(wtc[i][j] + "  ");
-			}
-			System.out.println("\n");
-		}
-		System.out.println("\n\n");
-		for(int i=0;i<dim;i++){
-			for(int j=0;j<dim;j++){
-				System.out.print(stc[i][j] + "  ");
-			}
-			System.out.println("\n");
-		}
-		
-		
+				
 		return isDef;
 	}
 	
 	 /**
-     * Gets the maximal number from a set of numbers .It ignores the INF value as it represents only the no-edge.
+     * Gets the maximal number from a set of numbers. 
      * @param list  list of numbers to get the maximum value of
      * @return the maximal value from the set
      */
     public double getMax(ArrayList<Double> list) {
-    	double max= 0; //variable to save the maximal value to 
+    	double max = list.get(0); //variable to save the maximal value to 
    		 
 	   	for(int i=0;i<list.size();i++){
-	   		if (max < list.get(i) && list.get(i) < 10000) {
+	   		if (max < list.get(i)) {
 	   			max = list.get(i);
    			}    		  	 	 
 	   	}
 		return max;
 	}
 	
-	
+	/**
+	 * Counts the given power of the matrix from the input.
+	 * @param matrix 2d array to count the power of
+	 * @param power the power to count 
+	 * @return the powered matrix
+	 */
 	public double[][] powerMatrix(double[][] matrix, int power){
-		double[][] poweredMatrix = matrix;
+		double[][] poweredMatrix = new double[dim][dim];
 		
-		for(int h=0;h<power;h++){
-			poweredMatrix = multiplyMatrix(poweredMatrix, matrix);
+		for(int h=0;h<power-1;h++){
+			if( h == 0){
+				poweredMatrix = multiplyMatrix(matrix, matrix);
+			}else{
+				poweredMatrix = multiplyMatrix(poweredMatrix, matrix);
+			}
 		}
 		
 		return poweredMatrix;
@@ -237,9 +273,9 @@ public class Matrix {
 	}
 	
 	/**
-	 * Returns the eigenspace of the matrix, based on its bases.
+	 * Returns the eigenspace of the matrix as a String, based on its bases.
 	 * @param bases list of bases as a nested list
-	 * @return string representing the eigenspace
+	 * @return String representing the eigenspace
 	 */
 	public String getEigenSpace(ArrayList<ArrayList<Double>> bases){
 		ArrayList<String> indepBases = getIndepBases(bases);
@@ -248,21 +284,23 @@ public class Matrix {
 		String ending = "";
 		for(int i=0;i<bases.size();i++){
 			if(i==0){
-				eigenSpace += abc[i] + "⊗" + bases.get(i) + " ";
+				eigenSpace += abc[i] + "⊗" + indepBases.get(i) + " ";
 			}else{
-				eigenSpace += "⊕" + bases.get(i) + " ";
+				eigenSpace += "⊕" + abc[i] + "⊗" + indepBases.get(i) + " ";
 			}	
+			ending += ", " + abc[i];
 		}		
-		ending += ", ∈ ℝ* }";
+		ending += " ∈ ℝ* }";
 		
 		return eigenSpace + ending;
 	}
 	
 	/**
+	 * Checks whether two bases are independent or not.
 	 * 
-	 * @param d1
-	 * @param d2
-	 * @return
+	 * @param d1 base1
+	 * @param d2 base2
+	 * @return true if they are independent, else false
 	 */
 	public boolean areIndependent(ArrayList<Double> d1, ArrayList<Double> d2){
 		boolean areIndep = true;
@@ -283,24 +321,42 @@ public class Matrix {
 	}
 	
 	/**
-	 * Return a list of independent bases.
-	 * @return
+	 * Checks which bases are independent.
+	 * Returns a list of independent bases.
+	 * @return list of independent bases
 	 */
 	public ArrayList<String> getIndepBases(ArrayList<ArrayList<Double>> listOfBases){
-		ArrayList<String> indepBases = null;
+		ArrayList<String> indepBases = new ArrayList<String>();
+		String base = "Δ";
+		int size = listOfBases.size();
 		
-		/*
-		 * IMPLEMENT 
-		 */
+		for(int i=0;i<size;i++){
+			indepBases.add(base+i);
+		}
+	
+		/*for(int i=0;i<size;i++){
+			for(int j=0;j<dim;j++){
+				if(i != j && areIndependent(listOfBases.get(i), listOfBases.get(j))){
+					if(!indepBases.contains(base+i) && !indepBases.contains(base+j)){
+						indepBases.add(base + i);
+						indepBases.add(base + j);
+					}
+				}else{
+						indepBases.add(base + i);
+					}
+			}
+		}*/
+		
 		return indepBases;
 	}
+	
 	/**
 	 * Sets the value of the edge directed from vertex1 to vertex2
 	 * @param vertex1 start vertex
 	 * @param vertex2 end vertex
 	 * @param value - value to be set.
 	 */
-	protected void setEdge(double[][] matrix, int vertex1, int vertex2, int value) {		
+	protected void setValue(int vertex1, int vertex2, double value) {		
 		matrix[vertex1][vertex2] = value;			
 	}
 	

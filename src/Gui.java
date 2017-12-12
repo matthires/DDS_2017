@@ -118,8 +118,8 @@ public class Gui {
 	    
 	    eigenSpace = new JLabel("");
 	    eigenSpace.setForeground(Color.white);
-	    eigenSpace.setFont(new Font("San-Serif", Font.BOLD, 16));
-	    eigenSpace.setSize(500, 30);
+	    eigenSpace.setFont(new Font("San-Serif", Font.BOLD, 20));
+	    eigenSpace.setSize(850, 30);
 	    eigenSpace.setLocation(250, 850);	
 
 	    setPanelContents();
@@ -155,8 +155,10 @@ public class Gui {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				mtx.isDefinite(mtx.getMatrix());
-				showFwMatrix();
+				if(saveMatrix()){			
+					//mtx.debug();					
+					showFwMatrix();					
+				}	
 			}
 		});
 		
@@ -191,18 +193,19 @@ public class Gui {
 	 * Resets all the fields, deletes all the text.
 	 */
 	public void reset(){
-		mtx = new Matrix(this, dim);
+		mtx = new Matrix(dim);
 		matrixLayout.removeAll();
 		frame.repaint();	
 		fwButton.setVisible(false);
 		stcButton.setVisible(false);
 		basesButton.setVisible(false);
 		eigenButton.setVisible(false);
+		mtxLabel.setVisible(false);
 	}
 	
 	/**
-	 * Printing out the "names" of the matrices when they show up.
-	 * @param dim dimension of the matrices
+	 * Printing out the textfields for the matrix
+	 * @param dim dimension of the matrix
 	 */
 	public void showMatrix(){	
 		mtxLabel.setLocation(50, 230 + (dim-1)*35/2);
@@ -211,7 +214,6 @@ public class Gui {
 	    fwButton.setLocation(90+(dim*35),  240 + (dim-1)*35/2);
 	    fwButton.setVisible(true);
 	    
-		JTextField temp = new JTextField(" ");
 	    mtxField = new JTextField[dim][dim];
         for(int i = 0;i < dim;i++){
         	for(int j = 0;j < dim;j++){	
@@ -253,34 +255,42 @@ public class Gui {
 		}
 
 	}
-	
+
 	/**
-	 * Returns the matrix we are working with as a 2d textfield.
-	 * @return matrix
+	 * Saves the specified values to the matrix
+	 * @return true if there is no error, else false
 	 */
-	public double getMtxValue(int idx1, int idx2){
+	public boolean saveMatrix(){
 		double value = 0;
-		String val = mtxField[idx1][idx2].getText();
-		try{
-			value = Double.parseDouble(val);
-		}catch(NumberFormatException nfe){
-			if(val.equals("ε")){
-				value = Matrix.EPS;
-			}
-			else{
-				JOptionPane.showMessageDialog(frame , 
-					"Matica nie je správne definovaná!",
-						"CHYBA!",JOptionPane.ERROR_MESSAGE);
-			}
+		
+		for(int i = 0;i < dim;i++){
+        	for(int j = 0;j < dim;j++){         		
+        		String val = mtxField[i][j].getText();
+        		try{
+        			value = Double.parseDouble(val);
+        			mtx.setValue(i, j, value);   
+        		}catch(NumberFormatException nfe){
+        			if(val.equals("ε")){
+        				mtx.setValue(i, j, Matrix.EPS);
+        			}else{
+        				JOptionPane.showMessageDialog(frame , 
+        					"Matica nie je správne definovaná!",
+        						"CHYBA!",JOptionPane.ERROR_MESSAGE);
+        				return false;
+        			}
+        		}
+			}     		
 		}
-		return value;
+		return true;
 	}
+	
 	
 	/**
 	 * Prints out the ordered matrix after using the F-W algorithm.
 	 */
 	public void showFwMatrix(){
-		double[][] matrix = mtx.floydWarshall(mtx.getMatrix());
+		double[][] matrix = mtx.getFWMatrix();
+		mtx.debug();
 		String value;
 		JTextField fwTextField;
 		
@@ -304,13 +314,13 @@ public class Gui {
 		}		
 	}
 	
-	
+
 	/**
 	 * Prints out the Strongly Transitive Closure.
 	 */
 	public void showSTClosure(){
-		double[][] wtc = mtx.floydWarshall(mtx.getMatrix());
-		double[][] stc = mtx.getStrTC(wtc);
+		//double[][] wtc = mtx.floydWarshall(mtx.getMatrix());
+		double[][] stc = mtx.getStrTC();
 		String value;
 		JTextField stcTextField;
 		
@@ -335,12 +345,12 @@ public class Gui {
 	}
 	
 	/**
-	 * Prints out all the bases from the matrix
+	 * Prints out all the bases from the matrix.
 	 */
-	private void showBases() {
-		double[][] wtc = mtx.floydWarshall(mtx.getMatrix());
-		double[][] stc = mtx.getStrTC(wtc);
-		ArrayList<ArrayList<Double>> bases = mtx.getBases(wtc);
+	public void showBases() {
+		double[][] wtc = mtx.getFWMatrix();
+		double[][] stc = mtx.getStrTC();
+		ArrayList<ArrayList<Double>> bases = mtx.getBases(stc);
 		String value, baseStr = "Δ";
 		JLabel base;
 		JTextField baseTextField;
@@ -373,7 +383,7 @@ public class Gui {
 	
 	/**
 	 * Prints out the eigenspace of the given matrix.
-	 * (all the linearly independent bases..blah-blah) 
+	 * (all the linearly independent bases.) 
 	 */
 	public void showEigenSpace(){
 		double[][] matrix = mtx.getMatrix();
