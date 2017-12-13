@@ -155,9 +155,16 @@ public class Gui {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(saveMatrix()){			
-					//mtx.debug();					
-					showFwMatrix();					
+				if(saveMatrix()){	
+					try{
+						if(mtx.isDefinite()){
+							showFwMatrix();	
+						}else{
+							throw new NotDefiniteMatrixException(frame);
+						}
+					}catch(NotDefiniteMatrixException ndme){
+						
+					}
 				}	
 			}
 		});
