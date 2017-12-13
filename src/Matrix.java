@@ -41,24 +41,34 @@ public class Matrix {
 	 */
 	public double[][] getFWMatrix(){
 		double[][] fwMatrix = new double[dim][dim];
-		double shrtPath = 0;
+		double shortPath = 0;
+
+		/*saving the given matrix,
+		changing the non infinite values to 0*/
+		for(int i = 0;i < dim;i++){
+			for(int j = 0;j < dim;j++){
+				if(matrix[i][j] > -10000){
+        			fwMatrix[i][j] = 0;
+        		}else{
+        			fwMatrix[i][j] = EPS;
+        		}
+			}
+		}
 		
 		for(int i = 0;i < dim;i++){
-        	for(int j = 0;j < dim;j++){
-        		fwMatrix[i][j] = matrix[i][j];
+        	for(int j = 0;j < dim;j++){        		
         		for(int k = 0;k < dim;k++){
-    				shrtPath = Math.min( getValueOf(i, k) 
-    					+ getValueOf(k, j), getValueOf( i, j));
-    				if(shrtPath < -10000){
-    					shrtPath = Math.max( getValueOf(i, k) 
-    	    					+ getValueOf(k, j), getValueOf(i, j));
-    				}
-        			if(shrtPath < -10000){
-            			fwMatrix[i][j] = fwMatrix[i][j];        				
-        			}        			
-        			else{
-        				fwMatrix[i][j] = 0;
-        			}
+    				shortPath = Math.min( fwMatrix[k][j], 
+    						fwMatrix[k][i] + fwMatrix[i][j] );
+    				if(shortPath < -10000){
+    						shortPath = Math.max( fwMatrix[k][j],
+    								fwMatrix[k][i] + fwMatrix[i][j]);
+					}
+        			if(k == i || j == i){
+        				fwMatrix[k][j] = fwMatrix[k][j];        
+        			}else{
+						fwMatrix[k][j] = shortPath;    					
+    				}    					
         		}
         	}
 		}
@@ -164,7 +174,7 @@ public class Matrix {
 
 		double[][] a2 = multiplyMatrix(matrix, matrix); 
 		double[][] a3 = multiplyMatrix(a2, matrix); 
-		double[][] a4 = multiplyMatrix(a2, matrix); 		
+		double[][] a4 = multiplyMatrix(a3, matrix); 		
 		
 		System.out.println("A");
 		debugprint(matrix);
