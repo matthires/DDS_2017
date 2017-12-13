@@ -88,7 +88,7 @@ public class Matrix {
 				if(i == j ||  matrix[i][j] > -10000){
 					mtx[i][i] = 0;
 				}else{
-					mtx[i][j] = matrix[i][j];
+					mtx[i][j] = getMatrix()[i][j];
 				}
 			}
 		}
@@ -154,7 +154,7 @@ public class Matrix {
      * Prints out the matrix from the input to the console.
      * @param matrix as a 2d array to print out
      */
-    public void debugprint(double[][] matrix){
+    public void printMatrix(double[][] matrix){
     	System.out.println("--------------------------------");
     	for(int i=0;i<dim;i++){
 			for(int j=0;j<dim;j++){
@@ -177,17 +177,17 @@ public class Matrix {
 		double[][] a4 = multiplyMatrix(a3, matrix); 		
 		
 		System.out.println("A");
-		debugprint(matrix);
+		printMatrix(matrix);
 		System.out.println("A^2");
-		debugprint(a2);
+		printMatrix(a2);
 		System.out.println("A^3");
-		debugprint(a3);
+		printMatrix(a3);
 		System.out.println("A^4");
-		debugprint(a4);   
+		printMatrix(a4);   
 		System.out.println("stc");
-		debugprint(stc);    	
+		printMatrix(stc);    	
 		System.out.println("wtc");
-		debugprint(wtc);    	
+		printMatrix(wtc);    	
 		
     }
 	
@@ -339,12 +339,9 @@ public class Matrix {
 		ArrayList<String> indepBases = new ArrayList<String>();
 		String base = "Δ";
 		int size = listOfBases.size();
-		
-		for(int i=0;i<size;i++){
-			indepBases.add(base+i);
-		}
 	
-		/*for(int i=0;i<size;i++){
+		/*OPRAVIT
+		 * for(int i=0;i<size;i++){
 			for(int j=0;j<dim;j++){
 				if(i != j && areIndependent(listOfBases.get(i), listOfBases.get(j))){
 					if(!indepBases.contains(base+i) && !indepBases.contains(base+j)){
@@ -354,7 +351,7 @@ public class Matrix {
 				}else{
 						indepBases.add(base + i);
 					}
-			}
+			}  
 		}*/
 		
 		return indepBases;
