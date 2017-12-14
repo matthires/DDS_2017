@@ -15,6 +15,7 @@ public class Matrix {
 		private int dim;		
 		static final double EPS = -100000;
 		private double[][] matrix;
+		private double eigVal;
 		
 		/**
 		 * Creates a matrix as a 2d array
@@ -46,7 +47,7 @@ public class Matrix {
 		double shortPath = 0;
 		
 		KarpAlgorithm kA = new KarpAlgorithm(this);
-		double eigVal = kA.getEigenValue();
+		eigVal = kA.getEigenValue();
 		double[][] defMatrix = getDefMatrix(eigVal);
 
 		/*saving the definite matrix,
@@ -89,12 +90,14 @@ public class Matrix {
 	 */
 	public double[][] getStrTC(){
 		double[][] mtx = new double[dim][dim];
+		double[][] defMatrix = getDefMatrix(eigVal);
+		
 		for(int i=0;i<dim;i++){
 			for(int j=0;j<dim;j++){
 				if(i == j ||  matrix[i][j] > -10000){
 					mtx[i][i] = 0;
 				}else{
-					mtx[i][j] = getMatrix()[i][j];
+					mtx[i][j] = EPS;
 				}
 			}
 		}
@@ -111,6 +114,7 @@ public class Matrix {
 		double[][] mtx = new double[dim][dim];
     	// temporary list to save the set of numbers we need the maximum of
 		ArrayList<Double> temp = new ArrayList<Double>();
+		
     	 for (int i=0;i<dim;i++){
              for (int j=0;j<dim;j++){   
                 for (int k=0;k<dim;k++){
