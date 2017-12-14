@@ -28,8 +28,9 @@ import javax.swing.SwingConstants;
 public class Gui {
 	 private static JLabel title, author, selectDimension, mtxLabel;
 	 private static JFrame frame;
-	 private static JLabel panel, matrixLayout, eigenSpace;
-	 private static JButton  resetBtn, fwButton, stcButton, basesButton, eigenButton;
+	 private static JLabel panel, matrixLayout, eigenSpace, eigenVal;
+	 private static JButton  resetBtn, fwButton, stcButton, 
+	 			basesButton, eigenSpButton, eigenValButton;
 	 private String[] dims = {" ", "1", "2", "3", "4", "5", "6", "7"};
 	 private JComboBox<?> dimensions;
 	 private Matrix mtx = null;
@@ -111,16 +112,27 @@ public class Gui {
 	    basesButton.setSize(120, 30);
 	    basesButton.setVisible(false);
 	    
-	    eigenButton = new JButton("Vlastný priestor");
-	    eigenButton.setSize(180, 30);
-		eigenButton.setLocation(50,850);
-	    eigenButton.setVisible(false);
+	    eigenSpButton = new JButton("Vlastný priestor");
+	    eigenSpButton.setSize(180, 30);
+		eigenSpButton.setLocation(50,850);
+	    eigenSpButton.setVisible(false);
 	    
 	    eigenSpace = new JLabel("");
 	    eigenSpace.setForeground(Color.white);
 	    eigenSpace.setFont(new Font("San-Serif", Font.BOLD, 20));
 	    eigenSpace.setSize(850, 30);
 	    eigenSpace.setLocation(250, 850);	
+	    
+	    eigenValButton = new JButton("Vlastna hodnota");
+	    eigenValButton.setSize(150, 30);
+	    eigenValButton.setLocation(90,200);
+	    eigenValButton.setVisible(false);
+	    
+	    eigenVal = new JLabel("");
+	    eigenVal.setForeground(Color.white);
+	    eigenVal.setFont(new Font("San-Serif", Font.BOLD, 20));
+	    eigenVal.setSize(30, 30);
+	    eigenVal.setLocation(250, 200);	
 
 	    setPanelContents();
 		
@@ -151,21 +163,23 @@ public class Gui {
 			}
 		});
 		
+		eigenValButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(saveMatrix()){
+					getEigenVal();
+				}
+			}
+		});
+		
 		fwButton.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(saveMatrix()){	
-					try{
-						if(mtx.isDefinite()){
-							showFwMatrix();	
-						}else{
-							throw new NotDefiniteMatrixException(frame);
-						}
-					}catch(NotDefiniteMatrixException ndme){
-						
-					}
-				}	
+				if(saveMatrix()){						
+					showFwMatrix();	
+				}
 			}
 		});
 		
@@ -185,7 +199,7 @@ public class Gui {
 			}			
 		});
 		
-		eigenButton.addActionListener(new ActionListener() {
+		eigenSpButton.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -206,7 +220,9 @@ public class Gui {
 		fwButton.setVisible(false);
 		stcButton.setVisible(false);
 		basesButton.setVisible(false);
-		eigenButton.setVisible(false);
+		eigenSpButton.setVisible(false);
+		eigenVal.setVisible(false);
+		eigenValButton.setVisible(false);
 		mtxLabel.setVisible(false);
 	}
 	
@@ -220,6 +236,8 @@ public class Gui {
 
 	    fwButton.setLocation(90+(dim*35),  240 + (dim-1)*35/2);
 	    fwButton.setVisible(true);
+	    
+	    eigenValButton.setVisible(true);
 	    
 	    mtxField = new JTextField[dim][dim];
         for(int i = 0;i < dim;i++){
@@ -289,6 +307,14 @@ public class Gui {
 			}     		
 		}
 		return true;
+	}
+	
+	public void getEigenVal(){
+		KarpAlgorithm kA = new KarpAlgorithm(mtx);
+		String eVal = Double.toString(kA.getEigenValue());
+		
+		eigenVal.setVisible(true);
+		eigenVal.setText(eVal);
 	}
 	
 	
@@ -384,7 +410,7 @@ public class Gui {
         		matrixLayout.add(baseTextField);
 			}
 		}
-		eigenButton.setVisible(true);
+		eigenSpButton.setVisible(true);
 		
 	}
 	
@@ -413,8 +439,10 @@ public class Gui {
 		panel.add(mtxLabel);		
 		panel.add(stcButton);
 		panel.add(basesButton);
-		panel.add(eigenButton);
+		panel.add(eigenSpButton);
 		panel.add(eigenSpace);
+		panel.add(eigenVal);
+		panel.add(eigenValButton);
 	}
 		
 }

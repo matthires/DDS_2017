@@ -36,18 +36,24 @@ public class Matrix {
 	/**
 	 * Floyd-Warshall algorithm. Finds the less weighted paths from-to every 
 	 * vertex. Returns the ordered matrix.
+	 * It counts the weights from the definite matrix
+	 * (subtracted lambda from the original).
 	 *
 	 * @return the reordered matrix with the less weighted paths
 	 */
 	public double[][] getFWMatrix(){
 		double[][] fwMatrix = new double[dim][dim];
 		double shortPath = 0;
+		
+		KarpAlgorithm kA = new KarpAlgorithm(this);
+		double eigVal = kA.getEigenValue();
+		double[][] defMatrix = getDefMatrix(eigVal);
 
-		/*saving the given matrix,
+		/*saving the definite matrix,
 		changing the non infinite values to 0*/
 		for(int i = 0;i < dim;i++){
 			for(int j = 0;j < dim;j++){
-				if(matrix[i][j] > -10000){
+				if(defMatrix[i][j] > -10000){
         			fwMatrix[i][j] = 0;
         		}else{
         			fwMatrix[i][j] = EPS;
@@ -150,6 +156,22 @@ public class Matrix {
 	 }
 	
     /**
+     * Counts the definite matrix by subtracting the eigenvalue.
+     * @param eigVal the eigenvalue of the matrix
+     * @return the definite matrix
+     */
+    public double[][] getDefMatrix(double eigVal){
+    	double[][] defMatrix = new double[dim][dim];
+    	
+    	for (int i=0;i<dim;i++){
+            for (int j=0;j<dim;j++){   
+            	defMatrix[i][j] = matrix[i][j] - eigVal;
+            }
+    	}
+    	return defMatrix;
+    }
+    
+    /**
      * A help method for debugging.
      * Prints out the matrix from the input to the console.
      * @param matrix as a 2d array to print out
@@ -176,7 +198,7 @@ public class Matrix {
 		double[][] a3 = multiplyMatrix(a2, matrix); 
 		double[][] a4 = multiplyMatrix(a3, matrix); 		
 		
-		System.out.println("A");
+		/*System.out.println("A");
 		printMatrix(matrix);
 		System.out.println("A^2");
 		printMatrix(a2);
@@ -187,10 +209,14 @@ public class Matrix {
 		System.out.println("stc");
 		printMatrix(stc);    	
 		System.out.println("wtc");
-		printMatrix(wtc);    	
+		printMatrix(wtc);    */
+		KarpAlgorithm ka = new KarpAlgorithm(this);
+		
+		System.out.println(ka.getEigenValue());
 		
     }
-	
+    
+    
 	/**
 	 * Checks whether the given matrix is a definite matrix or not.
 	 * A matrix is definite, when its eigenvalue is equal to 0 and
@@ -212,7 +238,7 @@ public class Matrix {
         		if(wtc[i][j] != stc[i][j]){
         			isDef = false;
         		}
-        		diag.add(powerMatrix(matrix, dim)[i][i]);
+        		diag.add(powerMatrix(matrix, dim)[i][i]/(i+1));
         	}
     	}		
 		lambda = getMax(diag);
