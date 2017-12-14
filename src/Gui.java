@@ -418,8 +418,8 @@ public class Gui {
 	 * (all the linearly independent bases.) 
 	 */
 	public void showEigenSpace(){
-		double[][] matrix = mtx.getMatrix();
-		ArrayList<ArrayList<Double>> bases = mtx.getFundVectors(matrix);
+		double[][] wtc = mtx.getFWMatrix();
+		ArrayList<ArrayList<Double>> bases = mtx.getFundVectors(wtc);
 		eigenSpace.setText(mtx.getEigenSpace(bases));
 		eigenSpace.setVisible(true);
 	}

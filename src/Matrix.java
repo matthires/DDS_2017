@@ -304,11 +304,11 @@ public class Matrix {
 	 * @return String representing the eigenspace
 	 */
 	public String getEigenSpace(ArrayList<ArrayList<Double>> bases){
-		ArrayList<String> indepBases = getIndepBases(bases);
+		ArrayList<String> indepBases = getBase(bases);
 		String[] abc = {"α", "β", "γ", "δ", "ζ", "η", "θ"};
 		String eigenSpace = "V(A)= { ";
 		String ending = "";
-		for(int i=0;i<bases.size();i++){
+		for(int i=0;i<indepBases.size();i++){
 			if(i==0){
 				eigenSpace += abc[i] + "⊗" + indepBases.get(i) + " ";
 			}else{
@@ -351,26 +351,46 @@ public class Matrix {
 	 * Returns a list of independent bases.
 	 * @return list of independent bases
 	 */
-	public ArrayList<String> getIndepBases(ArrayList<ArrayList<Double>> listOfBases){
-		ArrayList<String> indepBases = new ArrayList<String>();
+	public ArrayList<String> getBase(ArrayList<ArrayList<Double>> listOfFundamentalEigenVectors){
+		ArrayList<String> independentBases = new ArrayList<String>();
 		String base = "Δ";
-		int size = listOfBases.size();
-	
-		/*OPRAVIT
-		 * for(int i=0;i<size;i++){
-			for(int j=0;j<dim;j++){
-				if(i != j && areIndependent(listOfBases.get(i), listOfBases.get(j))){
-					if(!indepBases.contains(base+i) && !indepBases.contains(base+j)){
-						indepBases.add(base + i);
-						indepBases.add(base + j);
-					}
-				}else{
-						indepBases.add(base + i);
-					}
-			}  
-		}*/
+		int size = listOfFundamentalEigenVectors.size();
+		boolean independency = false;
 		
-		return indepBases;
+		ArrayList<ArrayList<Double>> indBases = new ArrayList<>();
+		indBases.add(listOfFundamentalEigenVectors.get(0));
+		independentBases.add(base + (1));
+		for(int i = 1; i < size; i++) {
+			independency = true;
+			for(int j = 0; j < indBases.size(); j++) {
+				if(!areIndependent(indBases.get(j), listOfFundamentalEigenVectors.get(i))) {
+					independency = false;
+				}
+			}
+			if(independency) {
+				indBases.add(listOfFundamentalEigenVectors.get(i));
+				independentBases.add(base + (i+1));
+			}
+		}
+//		ArrayList<String> indepBases = new ArrayList<String>();
+//		String base = "Δ";
+//		int size = listOfBases.size();
+//	
+//		/*OPRAVIT
+//		 * for(int i=0;i<size;i++){
+//			for(int j=0;j<dim;j++){
+//				if(i != j && areIndependent(listOfBases.get(i), listOfBases.get(j))){
+//					if(!indepBases.contains(base+i) && !indepBases.contains(base+j)){
+//						indepBases.add(base + i);
+//						indepBases.add(base + j);
+//					}
+//				}else{
+//						indepBases.add(base + i);
+//					}
+//			}  
+//		}*/
+		
+		return independentBases;
 	}
 	
 	/**
