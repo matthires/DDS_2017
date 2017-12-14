@@ -1,12 +1,9 @@
-import java.awt.Button;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.beans.Visibility;
-import java.nio.channels.ShutdownChannelGroupException;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
@@ -20,9 +17,13 @@ import javax.swing.SwingConstants;
 
 
 /**
+ * MAX-PLUS ALGEBRA.
+ * This program is made for computations in max-plus algebra.
+ * Its purpose is to find eigenspace of adefinite matrix using 
+ * Floyd-Warshall algorithm.
  * This class stands for the GUI part of the program.
  * 
- * @author matthires
+ * @author Hires, Gazda
  *
  */
 public class Gui {
@@ -39,7 +40,7 @@ public class Gui {
 	 /**
 	  * The constructor of the GUI.
 	  */
-	public Gui(){
+	public Gui(){		
 	}
 	
 	public static void main(String[] args) {
@@ -53,7 +54,7 @@ public class Gui {
 	 * other one for all the other components like buttons,labels etc.
 	 */
 	public void startGui(){
-		frame = new JFrame("Nájdenie vlastného priestoru pomocou F-W algoritmu");
+		frame = new JFrame("Nájdenie vlastného priestoru definitnej matice pomocou Floydovho-Warshallovho algoritmu");
 		frame.pack();
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -68,11 +69,12 @@ public class Gui {
         matrixLayout.setLayout(null);
         matrixLayout.setSize(1200,1000);
                 
-		title = new JLabel("Nájdenie vlastného priestoru pomocou F-W algoritmu");
+		title = new JLabel("NÁJDENIE VLASTNÉHO PRIESTORU DEFINITNEJ MATICE"
+				+ " POMOCOU F-W ALGORITMU");
 		title.setFont(new Font("San-Serif", Font.BOLD, 22));		
 		title.setForeground(Color.white);
-		title.setSize(550, 30);
-		title.setLocation(300, 40);
+		title.setSize(1000, 30);
+		title.setLocation(120, 40);
 		
 		author = new JLabel("Gazda, Hireš, Marková, 2017");
 		author.setForeground(Color.white);
@@ -98,7 +100,8 @@ public class Gui {
 				
 	    resetBtn = new JButton("Vynulovať");
 	    resetBtn.setSize(120, 30);
-	    resetBtn.setLocation(820, 100);
+	    resetBtn.setLocation(300, 100);
+	    resetBtn.setVisible(false);
 	    
 	    fwButton = new JButton("[F-W] => ");
 	    fwButton.setSize(120, 30);
@@ -131,12 +134,12 @@ public class Gui {
 	    eigenVal = new JLabel("");
 	    eigenVal.setForeground(Color.white);
 	    eigenVal.setFont(new Font("San-Serif", Font.BOLD, 20));
-	    eigenVal.setSize(30, 30);
+	    eigenVal.setSize(50, 30);
 	    eigenVal.setLocation(250, 200);	
 
 	    setPanelContents();
 		
-		frame.setSize(1200, 1000);
+		frame.setSize(1180, 1000);
 		frame.setVisible(true);
 		frame.setContentPane(panel);
 
@@ -146,7 +149,7 @@ public class Gui {
 		    	try{
 		    		String selectedDim = dimensions.getSelectedItem().toString();
 		    		dim = Integer.parseInt(selectedDim);
-					reset();
+					reset();					
 					showMatrix();	
 		    	}catch(NumberFormatException nfe){
 		    		reset();
@@ -160,6 +163,7 @@ public class Gui {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				reset();
+				dimensions.setSelectedIndex(0);
 			}
 		});
 		
@@ -221,6 +225,7 @@ public class Gui {
 		stcButton.setVisible(false);
 		basesButton.setVisible(false);
 		eigenSpButton.setVisible(false);
+		eigenSpace.setVisible(false);
 		eigenVal.setVisible(false);
 		eigenValButton.setVisible(false);
 		mtxLabel.setVisible(false);
@@ -234,15 +239,17 @@ public class Gui {
 		mtxLabel.setLocation(50, 230 + (dim-1)*35/2);
 		mtxLabel.setVisible(true);	
 
-	    fwButton.setLocation(90+(dim*35),  240 + (dim-1)*35/2);
+	    fwButton.setLocation(92+(dim*35),  240 + (dim-1)*35/2);
 	    fwButton.setVisible(true);
+	    
+	    resetBtn.setVisible(true);
 	    
 	    eigenValButton.setVisible(true);
 	    
 	    mtxField = new JTextField[dim][dim];
         for(int i = 0;i < dim;i++){
         	for(int j = 0;j < dim;j++){	
-	            mtxField[i][j] = new JTextField("0.0", 10);
+	            mtxField[i][j] = new JTextField("0", 10);
 	            mtxField[i][j].setBounds(90 + j * 35, 240 + i * 35, 30, 30);
 	            mtxField[i][j].setHorizontalAlignment(SwingConstants.CENTER);
 	            mtxField[i][j].setFont(new Font("San-Serif", Font.BOLD, 16));  
@@ -323,11 +330,10 @@ public class Gui {
 	 */
 	public void showFwMatrix(){
 		double[][] matrix = mtx.getFWMatrix();
-		mtx.debug();
 		String value;
 		JTextField fwTextField;
 		
-		stcButton.setLocation(220 + (dim*70),  240 + (dim-1)*35/2);
+		stcButton.setLocation(222 + (dim*70),  240 + (dim-1)*35/2);
 	    stcButton.setVisible(true);
 		
 		for(int i = 0;i < dim;i++){
@@ -373,7 +379,7 @@ public class Gui {
         		matrixLayout.add(stcTextField);
         	}
 		}		
-	    basesButton.setLocation((315+(dim*105))/2, 505);
+	    basesButton.setLocation((315+(dim*97))/2, 505);
 		basesButton.setVisible(true);
 	}
 	

@@ -1,15 +1,11 @@
 import java.util.ArrayList;
 
 /**
- * Represents an interval matrix and operations with matrices..
- * When the constructor is called, it displays
- * a 2D array (of chosen dimension) of text fields on the main frame.
- * To initialize the matrix or matrices, the class also creates a 
- * new 2D array of integers where it stores the values filled in the text fields.
+ * Represents a matrix and operations with matrices..
+ * The operations are in the max-plus algebra. 
+ * Matrices are represented as 2d arrays.
  * 
- * 
- * @author matthires
- *
+ * @author Hires, Gazda
  */
 public class Matrix {	
 		private int dim;		
@@ -19,7 +15,7 @@ public class Matrix {
 		
 		/**
 		 * Creates a matrix as a 2d array
-		 * @param dimension Dimension of the matrices
+		 * @param dimension Dimension of the matrix
 		 */
 	public Matrix(int dimension){   
 		dim = dimension; //dimension of the matrix
@@ -99,7 +95,7 @@ public class Matrix {
 	public double[][] multiplyMatrix(double[][] m1, double[][] m2){
 		double[][] mtx = new double[dim][dim];
     	// temporary list to save the set of numbers we need the maximum of
-		ArrayList<Double> temp = new ArrayList<Double>();
+		ArrayList<Double> temp = new ArrayList<>();
 		
     	 for (int i=0;i<dim;i++){
              for (int j=0;j<dim;j++){   
@@ -146,7 +142,8 @@ public class Matrix {
 	 }
 	
     /**
-     * Counts the definite matrix by subtracting the eigenvalue.
+     * Counts the definite matrix by subtracting the eigenvalue
+     * from the given matrix.
      * @param eigVal the eigenvalue of the matrix
      * @return the definite matrix
      */
@@ -161,83 +158,7 @@ public class Matrix {
     	return defMatrix;
     }
     
-    /**
-     * A help method for debugging.
-     * Prints out the matrix from the input to the console.
-     * @param matrix as a 2d array to print out
-     */
-    public void printMatrix(double[][] matrix){
-    	System.out.println("--------------------------------");
-    	for(int i=0;i<dim;i++){
-			for(int j=0;j<dim;j++){
-				System.out.print(matrix[i][j] + "  ");
-			}
-			System.out.println("\n");
-		}
-    	System.out.println("--------------------------------");
-    }
     
-    /**
-     * Method for debugging..
-     */
-    public void debug(){
-    	/*double[][] stc = getStrTC();//strongly transitive closure
-		double[][] wtc = multiplyMatrix(matrix, stc); //weakly transitive closure	
-
-		double[][] a2 = multiplyMatrix(matrix, matrix); 
-		double[][] a3 = multiplyMatrix(a2, matrix); 
-		double[][] a4 = multiplyMatrix(a3, matrix); 		
-		
-		System.out.println("A");
-		printMatrix(matrix);
-		System.out.println("A^2");
-		printMatrix(a2);
-		System.out.println("A^3");
-		printMatrix(a3);
-		System.out.println("A^4");
-		printMatrix(a4);   
-		System.out.println("stc");
-		printMatrix(stc);    	
-		System.out.println("wtc");
-		printMatrix(wtc);    */
-		KarpAlgorithm ka = new KarpAlgorithm(this);
-		
-		System.out.println(ka.getEigenValue());
-		
-    }
-    
-    
-	/**
-	 * Checks whether the given matrix is a definite matrix or not.
-	 * A matrix is definite, when its eigenvalue is equal to 0 and
-	 * its digraph is strongly connected. 
-	 * A matrix is strongly connected if the Strongly 
-	 * and the Weakly transitive closures are equal.
-	 * @return true if the matrix is definite, else false
-	 */
-	public boolean isDefinite(){
-		double[][] stc = getStrTC();//strongly transitive closure
-		double[][] wtc = multiplyMatrix(matrix, stc); //weakly transitive closure	
-		
-		ArrayList<Double> diag = new ArrayList<Double>();
-		double lambda = 0;
-		
-		boolean isDef = true;
-		for(int i = 0;i < dim;i++){
-        	for(int j = 0;j < dim;j++){
-        		if(wtc[i][j] != stc[i][j]){
-        			isDef = false;
-        		}
-        		diag.add(powerMatrix(matrix, dim)[i][i]/(i+1));
-        	}
-    	}		
-		lambda = getMax(diag);
-		if(lambda != 0 || !isDef){
-			isDef = false;
-		}
-				
-		return isDef;
-	}
 	
 	 /**
      * Gets the maximal number from a set of numbers. 
@@ -304,15 +225,15 @@ public class Matrix {
 	 * @return String representing the eigenspace
 	 */
 	public String getEigenSpace(ArrayList<ArrayList<Double>> bases){
-		ArrayList<String> indepBases = getBase(bases);
+		ArrayList<String> indepBases = getBases(bases);
 		String[] abc = {"α", "β", "γ", "δ", "ζ", "η", "θ"};
-		String eigenSpace = "V(A)= { ";
+		String eigenSpace = "V(A) = { ";
 		String ending = "";
 		for(int i=0;i<indepBases.size();i++){
 			if(i==0){
 				eigenSpace += abc[i] + "⊗" + indepBases.get(i) + " ";
 			}else{
-				eigenSpace += "⊕" + abc[i] + "⊗" + indepBases.get(i) + " ";
+				eigenSpace += "⊕ " + abc[i] + "⊗" + indepBases.get(i) + " ";
 			}	
 			ending += ", " + abc[i];
 		}		
@@ -322,37 +243,36 @@ public class Matrix {
 	}
 	
 	/**
-	 * Checks whether two bases are independent or not.
+	 * Checks whether two vectors are independent or not.
 	 * 
-	 * @param d1 base1
-	 * @param d2 base2
+	 * @param d1 vector1 as a list of numbers
+	 * @param d2 vector2 as a list of numbers
 	 * @return true if they are independent, else false
 	 */
 	public boolean areIndependent(ArrayList<Double> d1, ArrayList<Double> d2){
-		boolean areIndep = true;
+		boolean areIndep = false;
 		double dif;
 		
 		if(d1.size() > 1){
 			dif = d1.get(0) - d2.get(0);
 			for(int i=1;i<dim;i++){			
-				if(d1.get(i) - d2.get(i) == dif){
-					return false;
+				if(d1.get(i) - d2.get(i) != dif){
+					return true;
 				}
 			}
-		}else{
-			return false;
 		}
 		
 		return areIndep;
 	}
 	
 	/**
-	 * Checks which bases are independent.
-	 * Returns a list of independent bases.
+	 * Checks which fundamental vectors are independent.
+	 * @param listOfFundamentalEigenVectors the list of 
+	 * all the fundamental eigenvectors got from the definite matrix.
 	 * @return list of independent bases
 	 */
-	public ArrayList<String> getBase(ArrayList<ArrayList<Double>> listOfFundamentalEigenVectors){
-		ArrayList<String> independentBases = new ArrayList<String>();
+	public ArrayList<String> getBases(ArrayList<ArrayList<Double>> listOfFundamentalEigenVectors){
+		ArrayList<String> independentBases = new ArrayList<>();
 		String base = "Δ";
 		int size = listOfFundamentalEigenVectors.size();
 		boolean independency = false;
@@ -367,28 +287,11 @@ public class Matrix {
 					independency = false;
 				}
 			}
-			if(independency) {
+			if(independency){
 				indBases.add(listOfFundamentalEigenVectors.get(i));
 				independentBases.add(base + (i+1));
 			}
 		}
-//		ArrayList<String> indepBases = new ArrayList<String>();
-//		String base = "Δ";
-//		int size = listOfBases.size();
-//	
-//		/*OPRAVIT
-//		 * for(int i=0;i<size;i++){
-//			for(int j=0;j<dim;j++){
-//				if(i != j && areIndependent(listOfBases.get(i), listOfBases.get(j))){
-//					if(!indepBases.contains(base+i) && !indepBases.contains(base+j)){
-//						indepBases.add(base + i);
-//						indepBases.add(base + j);
-//					}
-//				}else{
-//						indepBases.add(base + i);
-//					}
-//			}  
-//		}*/
 		
 		return independentBases;
 	}

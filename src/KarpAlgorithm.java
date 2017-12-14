@@ -3,7 +3,7 @@ import java.util.ArrayList;
 /**
  * Karps algorithm to count the eigenvalue of a matrix.
  * It uses the column principle.
- * @author metti
+ * @author Hires, Gazda
  *
  */
 public class KarpAlgorithm {
@@ -23,9 +23,10 @@ public class KarpAlgorithm {
      */
     public ArrayList<ArrayList<Double>> getCols(){
         // list to save the first columns of the powered matrices
-    	ArrayList<ArrayList<Double>> listOfCols = new ArrayList<ArrayList<Double>>();  
+    	ArrayList<ArrayList<Double>> listOfCols = new ArrayList<>();  
         for(int i=0;i<=dim;i++){
-    		listOfCols.add(new ArrayList<Double>());
+        	ArrayList<Double> column = new ArrayList<>();
+    		listOfCols.add(column);
         	for(int j=0;j<dim;j++){
         		double value = mtx.powerMatrix(matrix, i+1)[j][0];
         		listOfCols.get(i).add(value);
@@ -40,9 +41,9 @@ public class KarpAlgorithm {
       * @return the eigenvalue of the matrix from the input
       */
      public double getEigenValue(){
-    	 ArrayList<Double> listOfMins = new ArrayList<Double>(); //list to save the minimum values 
+    	 ArrayList<Double> listOfMins = new ArrayList<>(); //list to save the minimum values 
     	 // temporary list to save the values to get the minimum of
-    	 ArrayList<Double> temp = new ArrayList<Double>(); 
+    	 ArrayList<Double> temp = new ArrayList<>(); 
     	 //adds the needed values(column principle) to the list to get the max of them 
     	 for(int i=0;i<dim;i++){
     		 temp.clear(); 
