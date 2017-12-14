@@ -94,7 +94,7 @@ public class Matrix {
 		
 		for(int i=0;i<dim;i++){
 			for(int j=0;j<dim;j++){
-				if(i == j ||  matrix[i][j] > -10000){
+				if(i == j ||  defMatrix[i][j] > -10000){
 					mtx[i][i] = 0;
 				}else{
 					mtx[i][j] = EPS;
@@ -195,14 +195,14 @@ public class Matrix {
      * Method for debugging..
      */
     public void debug(){
-    	double[][] stc = getStrTC();//strongly transitive closure
+    	/*double[][] stc = getStrTC();//strongly transitive closure
 		double[][] wtc = multiplyMatrix(matrix, stc); //weakly transitive closure	
 
 		double[][] a2 = multiplyMatrix(matrix, matrix); 
 		double[][] a3 = multiplyMatrix(a2, matrix); 
 		double[][] a4 = multiplyMatrix(a3, matrix); 		
 		
-		/*System.out.println("A");
+		System.out.println("A");
 		printMatrix(matrix);
 		System.out.println("A^2");
 		printMatrix(a2);
