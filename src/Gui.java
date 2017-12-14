@@ -108,8 +108,8 @@ public class Gui {
 	    stcButton.setSize(120, 30);
 	    stcButton.setVisible(false);	    		      
 	    
-	    basesButton = new JButton("Získať bázy");
-	    basesButton.setSize(120, 30);
+	    basesButton = new JButton("Fundamentálne vektory");
+	    basesButton.setSize(180, 30);
 	    basesButton.setVisible(false);
 	    
 	    eigenSpButton = new JButton("Vlastný priestor");
@@ -123,8 +123,8 @@ public class Gui {
 	    eigenSpace.setSize(850, 30);
 	    eigenSpace.setLocation(250, 850);	
 	    
-	    eigenValButton = new JButton("Vlastna hodnota");
-	    eigenValButton.setSize(150, 30);
+	    eigenValButton = new JButton("Vlastná hodnota");
+	    eigenValButton.setSize(130, 30);
 	    eigenValButton.setLocation(90,200);
 	    eigenValButton.setVisible(false);
 	    
@@ -195,7 +195,7 @@ public class Gui {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				showBases();
+				showFundVectors();
 			}			
 		});
 		
@@ -378,17 +378,16 @@ public class Gui {
 	}
 	
 	/**
-	 * Prints out all the bases from the matrix.
+	 * Prints out all the fundamental vectors from the weakly transitive closure.
 	 */
-	public void showBases() {
+	public void showFundVectors() {
 		double[][] wtc = mtx.getFWMatrix();
-		double[][] stc = mtx.getStrTC();
-		ArrayList<ArrayList<Double>> bases = mtx.getBases(stc);
+		ArrayList<ArrayList<Double>> funVectors = mtx.getFundVectors(wtc);
 		String value, baseStr = "Δ";
 		JLabel base;
 		JTextField baseTextField;
 		
-		for(int i=0;i<bases.size();i++){
+		for(int i=0;i<funVectors.size();i++){
 			base = new JLabel(baseStr + (i+1));
 			base.setFont(new Font("San-Serif", Font.BOLD, 16));
 			base.setSize(50, 50);
@@ -396,14 +395,14 @@ public class Gui {
 			base.setLocation(92 + i * 150, 530);
 			matrixLayout.add(base);
 			
-			for(int j=0;j<bases.get(i).size();j++){
-				if(bases.get(i).get(j) < -10000){
+			for(int j=0;j<funVectors.get(i).size();j++){
+				if(funVectors.get(i).get(j) < -10000){
         			baseTextField = new JTextField("ε", 10);
         		}else{
-        			value = Double.toString(bases.get(i).get(j));
+        			value = Double.toString(funVectors.get(i).get(j));
         			baseTextField = new JTextField(value, 10);
         		}
-        		baseTextField.setBounds(90 + j * 150, 580 + i * 35, 30, 30);
+        		baseTextField.setBounds(90 + i * 150, 580 + j * 35, 30, 30);
         		baseTextField.setHorizontalAlignment(SwingConstants.CENTER);
         		baseTextField.setFont(new Font("San-Serif", Font.BOLD, 16));
         		baseTextField.setEditable(false);        		
@@ -420,7 +419,7 @@ public class Gui {
 	 */
 	public void showEigenSpace(){
 		double[][] matrix = mtx.getMatrix();
-		ArrayList<ArrayList<Double>> bases = mtx.getBases(matrix);
+		ArrayList<ArrayList<Double>> bases = mtx.getFundVectors(matrix);
 		eigenSpace.setText(mtx.getEigenSpace(bases));
 		eigenSpace.setVisible(true);
 	}

@@ -43,34 +43,18 @@ public class Matrix {
 	 * @return the reordered matrix with the less weighted paths
 	 */
 	public double[][] getFWMatrix(){
-		double[][] fwMatrix = new double[dim][dim];
 		double shortPath = 0;
 		
 		KarpAlgorithm kA = new KarpAlgorithm(this);
 		eigVal = kA.getEigenValue();
-		double[][] defMatrix = getDefMatrix(eigVal);
+		double[][] fwMatrix = getDefMatrix(eigVal);
 
-		/*saving the definite matrix,
-		changing the non infinite values to 0*/
-		for(int i = 0;i < dim;i++){
-			for(int j = 0;j < dim;j++){
-				if(defMatrix[i][j] > -10000){
-        			fwMatrix[i][j] = 0;
-        		}else{
-        			fwMatrix[i][j] = EPS;
-        		}
-			}
-		}
 		
 		for(int i = 0;i < dim;i++){
         	for(int j = 0;j < dim;j++){        		
         		for(int k = 0;k < dim;k++){
-    				shortPath = Math.min( fwMatrix[k][j], 
+    				shortPath = Math.max( fwMatrix[k][j], 
     						fwMatrix[k][i] + fwMatrix[i][j] );
-    				if(shortPath < -10000){
-    						shortPath = Math.max( fwMatrix[k][j],
-    								fwMatrix[k][i] + fwMatrix[i][j]);
-					}
         			if(k == i || j == i){
         				fwMatrix[k][j] = fwMatrix[k][j];        
         			}else{
@@ -94,8 +78,10 @@ public class Matrix {
 		
 		for(int i=0;i<dim;i++){
 			for(int j=0;j<dim;j++){
-				if(i == j ||  defMatrix[i][j] > -10000){
+				if(i == j){ 
 					mtx[i][i] = 0;
+				}else if(defMatrix[i][j] > -10000){
+					mtx[i][j] = defMatrix[i][j];
 				}else{
 					mtx[i][j] = EPS;
 				}
@@ -290,26 +276,26 @@ public class Matrix {
 	}
 	
 	/**
-	 * Saves all the bases of the given matrix as a list to a list.
-	 * A column is a base, when the diagonal value is 0.
-	 * @param mtx matrix to search the bases in 
-	 * @return list of bases as a nested list
+	 * Saves all the fundamental vectors of the given matrix as a list to a list.
+	 * A column is a fundamental vector, when the diagonal value is 0.
+	 * @param weakly transitive closure
+	 * @return list of fundamental vectors as a nested list
 	 */
-	public ArrayList<ArrayList<Double>> getBases(double[][] mtx){
-		ArrayList<ArrayList<Double>> bases = 
-				new ArrayList<ArrayList<Double>>();
-		int cnt=0;
+	public ArrayList<ArrayList<Double>> getFundVectors(double[][] wtc){
+		ArrayList<ArrayList<Double>> funVectors = new ArrayList<>();
+		int cnt = 0;
 		
-		for(int i = 0;i < dim;i++){
-			if(mtx[i][i] == 0){
-				bases.add(new ArrayList<Double>());
-	        	for(int j = 0;j < dim;j++){
-					bases.get(cnt).add(mtx[i][j]);
+		for(int i=0;i<dim;i++){
+			if(wtc[i][i] == 0){
+				ArrayList<Double> vector = new ArrayList<>();
+				funVectors.add(vector);
+	        	for(int j=0;j<dim;j++){
+					funVectors.get(cnt).add(wtc[j][i]);
 				}
 				cnt++;
 			}
 		}
-		return bases;
+		return funVectors;
 	}
 	
 	/**
