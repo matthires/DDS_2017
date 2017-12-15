@@ -30,7 +30,7 @@ public class Gui {
 	 private static JLabel title, author, selectDimension, mtxLabel;
 	 private static JFrame frame;
 	 private static JLabel panel, matrixLayout, eigenSpace, eigenVal;
-	 private static JButton  resetBtn, fwButton, stcButton, 
+	 private static JButton  resetBtn, showDefMButton, fwButton, 
 	 			basesButton, eigenSpButton, eigenValButton;
 	 private String[] dims = {" ", "1", "2", "3", "4", "5", "6", "7"};
 	 private JComboBox<?> dimensions;
@@ -103,13 +103,13 @@ public class Gui {
 	    resetBtn.setLocation(300, 100);
 	    resetBtn.setVisible(false);
 	    
+	    showDefMButton = new JButton("D => ");
+	    showDefMButton.setSize(120, 30);
+	    showDefMButton.setVisible(false);
+	    
 	    fwButton = new JButton("[F-W] => ");
 	    fwButton.setSize(120, 30);
-	    fwButton.setVisible(false);
-	    
-	    stcButton = new JButton("Γ(D) => ");
-	    stcButton.setSize(120, 30);
-	    stcButton.setVisible(false);	    		      
+	    fwButton.setVisible(false);	    		      
 	    
 	    basesButton = new JButton("Fundamentálne vektory");
 	    basesButton.setSize(180, 30);
@@ -177,21 +177,21 @@ public class Gui {
 			}
 		});
 		
-		fwButton.addActionListener(new ActionListener() {
+		showDefMButton.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(saveMatrix()){						
-					showFwMatrix();	
+					showDefMatrix();	
 				}
 			}
 		});
 		
-		stcButton.addActionListener(new ActionListener() {
+		fwButton.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				showSTClosure();
+				showfwMatrix();
 			}
 		});
 		
@@ -221,8 +221,8 @@ public class Gui {
 		mtx = new Matrix(dim);
 		matrixLayout.removeAll();
 		frame.repaint();	
+		showDefMButton.setVisible(false);
 		fwButton.setVisible(false);
-		stcButton.setVisible(false);
 		basesButton.setVisible(false);
 		eigenSpButton.setVisible(false);
 		eigenSpace.setVisible(false);
@@ -239,8 +239,8 @@ public class Gui {
 		mtxLabel.setLocation(50, 230 + (dim-1)*35/2);
 		mtxLabel.setVisible(true);	
 
-	    fwButton.setLocation(92+(dim*35),  240 + (dim-1)*35/2);
-	    fwButton.setVisible(true);
+	    showDefMButton.setLocation(92+(dim*35),  240 + (dim-1)*35/2);
+	    showDefMButton.setVisible(true);
 	    
 	    resetBtn.setVisible(true);
 	    
@@ -316,67 +316,88 @@ public class Gui {
 		return true;
 	}
 	
+	
+	/**
+	 * Prints out the eigenvalue of the matrix.
+	 */
 	public void getEigenVal(){
 		KarpAlgorithm kA = new KarpAlgorithm(mtx);
-		String eVal = Double.toString(kA.getEigenValue());
+		double eigVal = kA.getEigenValue();
 		
+		if(eigVal < -10000){
+			eigenVal.setText("-");
+		}else{
+			String eVal = Double.toString(eigVal);
+			eigenVal.setText(eVal);
+		}		
 		eigenVal.setVisible(true);
-		eigenVal.setText(eVal);
+		
 	}
 	
 	
 	/**
-	 * Prints out the ordered matrix after using the F-W algorithm.
+	 * Prints out the definite matrix got by subtracting the eigenvalue
+	 * from the given matrix..
 	 */
-	public void showFwMatrix(){
-		double[][] matrix = mtx.getFWMatrix();
-		String value;
-		JTextField fwTextField;
+	public void showDefMatrix(){
+		KarpAlgorithm kA = new KarpAlgorithm(mtx);
+		double eigVal = kA.getEigenValue();
 		
-		stcButton.setLocation(222 + (dim*70),  240 + (dim-1)*35/2);
-	    stcButton.setVisible(true);
+		if(eigVal < -10000){
+			JOptionPane.showMessageDialog(frame , 
+					"Matica nemá vlastnú hodnotu!",
+						"CHYBA!",JOptionPane.ERROR_MESSAGE);
+		}else{
 		
-		for(int i = 0;i < dim;i++){
-        	for(int j = 0;j < dim;j++){  
-        		if(matrix[i][j] < -10000){
-        			fwTextField = new JTextField("ε", 10);
-        		}else{
-        			value = Double.toString(matrix[i][j]);
-        			fwTextField = new JTextField(value, 10);
-        		}
-        		fwTextField.setBounds(220+(dim*35) + j * 35, 240 + i * 35, 30, 30);
-        		fwTextField.setHorizontalAlignment(SwingConstants.CENTER);
-        		fwTextField.setFont(new Font("San-Serif", Font.BOLD, 16));
-        		fwTextField.setEditable(false);
-        		matrixLayout.add(fwTextField);
-        	}
-		}		
+			double[][] defMatrix = mtx.getDefMatrix(eigVal);
+			String value;
+			JTextField defMTextField;
+			
+			fwButton.setLocation(222 + (dim*70),  240 + (dim-1)*35/2);
+		    fwButton.setVisible(true);
+			
+			for(int i = 0;i < dim;i++){
+	        	for(int j = 0;j < dim;j++){  
+	        		if(defMatrix[i][j] < -10000){
+	        			defMTextField = new JTextField("ε", 10);
+	        		}else{
+	        			value = Double.toString(defMatrix[i][j]);
+	        			defMTextField = new JTextField(value, 10);
+	        		}
+	        		defMTextField.setBounds(220+(dim*35) + j * 35, 240 + i * 35, 30, 30);
+	        		defMTextField.setHorizontalAlignment(SwingConstants.CENTER);
+	        		defMTextField.setFont(new Font("San-Serif", Font.BOLD, 16));
+	        		defMTextField.setEditable(false);
+	        		matrixLayout.add(defMTextField);
+	        	}
+			}
+		}
 	}
 	
 
 	/**
-	 * Prints out the Strongly Transitive Closure.
+	 * Prints out the ordered matrix got by using the Floyd-Warshall algorithm.
+	 * It contains the paths of the less weight .
 	 */
-	public void showSTClosure(){
-		//double[][] wtc = mtx.floydWarshall(mtx.getMatrix());
-		double[][] stc = mtx.getStrTC();
+	public void showfwMatrix(){
+		double[][] stc = mtx.getFWMatrix();
 		String value;
-		JTextField stcTextField;
+		JTextField fwTextField;
 		
 		
 		for(int i=0;i<dim;i++){
         	for(int j=0;j<dim;j++){  
         		if(stc[i][j] < -10000){
-        			stcTextField = new JTextField("ε", 10);
+        			fwTextField = new JTextField("ε", 10);
         		}else{
         			value = Double.toString(stc[i][j]);
-        			stcTextField = new JTextField(value, 10);
+        			fwTextField = new JTextField(value, 10);
         		}
-        		stcTextField.setBounds(350+(dim*70) + j * 35, 240 + i * 35, 30, 30);
-        		stcTextField.setHorizontalAlignment(SwingConstants.CENTER);
-        		stcTextField.setFont(new Font("San-Serif", Font.BOLD, 16));
-        		stcTextField.setEditable(false);
-        		matrixLayout.add(stcTextField);
+        		fwTextField.setBounds(350+(dim*70) + j * 35, 240 + i * 35, 30, 30);
+        		fwTextField.setHorizontalAlignment(SwingConstants.CENTER);
+        		fwTextField.setFont(new Font("San-Serif", Font.BOLD, 16));
+        		fwTextField.setEditable(false);
+        		matrixLayout.add(fwTextField);
         	}
 		}		
 	    basesButton.setLocation((315+(dim*97))/2, 505);
@@ -440,9 +461,9 @@ public class Gui {
 		panel.add(selectDimension);
 		panel.add(dimensions);
 		panel.add(resetBtn);
-		panel.add(fwButton);
+		panel.add(showDefMButton);
 		panel.add(mtxLabel);		
-		panel.add(stcButton);
+		panel.add(fwButton);
 		panel.add(basesButton);
 		panel.add(eigenSpButton);
 		panel.add(eigenSpace);
